@@ -13,13 +13,14 @@ st.set_page_config(page_title="Monsoon Explorer", layout="wide")
 
 
 def get_db_url() -> str:
-    """Streamlit Cloud provides st.secrets; locally we use .env."""
-    if "DATABASE_URL" in st.secrets:
-        return st.secrets["DATABASE_URL"]
+    """Prefer Streamlit secrets (cloud); fall back to .env (local)."""
     from dotenv import load_dotenv
-
     load_dotenv()
-    return os.environ["DATABASE_URL"]
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        st.error("DATABASE_URL not set. Add it to .env locally, or to Secrets on Streamlit Cloud.")
+        st.stop()
+    return url
 
 
 @st.cache_data(ttl=3600)
